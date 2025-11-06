@@ -14,10 +14,9 @@ native_transfers:
 contracts:
     - name: NftMarketplace
       details:
-          - network: ethereum
-            address: 0xae78736cd615f374d3085123a210448e74fc6393
-            start_block: "18900000"
-            end_block: "19000000"
+          - network: anvil
+            address: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+            start_block: "0"
       abi: ./abis/RocketTokenRETH.abi.json
       include_events:
           - name: Transfer

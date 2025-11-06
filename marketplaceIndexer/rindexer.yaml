@@ -17,7 +17,7 @@ contracts:
           - network: anvil
             address: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
             start_block: "0"
-      abi: ./abis/NftMarketplace.abi.json
+      abi: ./abis/NFTMarketplace.abi.json
       include_events:
           - name: ItemListed
           - name: ItemCanceled

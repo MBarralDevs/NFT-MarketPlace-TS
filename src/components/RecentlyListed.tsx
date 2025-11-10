@@ -1,10 +1,13 @@
-import { useQuery } from "@tanstack/react-query"
-import { useMemo } from "react"
-import NFTBox from "./NFTBox"
-import Link from "next/link"
+import Link from "next/link";
+import NFTBox from "./NFTBox";
+import { useActiveListings } from "../hooks/useActiveListings";
 
-// Main component that uses the custom hook
 export default function RecentlyListedNFTs() {
+    const { data: activeListings, isLoading, error } = useActiveListings({
+        first: 50,
+        orderBy: ["BLOCK_TIMESTAMP_DESC"], // Most recent first
+    });
+
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="mt-8 text-center">
@@ -15,18 +18,40 @@ export default function RecentlyListedNFTs() {
                     List Your NFT
                 </Link>
             </div>
+            
             <h2 className="text-2xl font-bold mb-6">Recently Listed NFTs</h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                <img
-                    src="/placeholder.png"
-                    alt={`NFT`}
-                    className="w-full h-auto max-h-96 object-contain bg-zinc-50"
-                    onError={() => {
-                        console.error("Error loading NFT image")
-                    }}
-                />
-            </div>
+            {isLoading && (
+                <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                </div>
+            )}
+
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong className="font-bold">Error loading listings: </strong>
+                    <span className="block sm:inline">{(error as Error).message}</span>
+                </div>
+            )}
+
+            {!isLoading && !error && activeListings && activeListings.length === 0 && (
+                <div className="text-center py-12 text-gray-500">
+                    <p className="text-lg">No NFTs listed yet. Be the first to list!</p>
+                </div>
+            )}
+
+            {!isLoading && !error && activeListings && activeListings.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                    {activeListings.map((listing) => (
+                        <NFTBox
+                            key={`${listing.contractAddress}-${listing.tokenId}-${listing.network}`}
+                            tokenId={listing.tokenId}
+                            contractAddress={listing.nftAddress}
+                            price={listing.price}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
-    )
+    );
 }

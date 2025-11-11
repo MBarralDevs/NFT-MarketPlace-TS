@@ -1,6 +1,6 @@
 // GraphQL client utility for querying the marketplace data
 
-const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:5000/graphql';
+const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:3001/graphql';
 
 interface GraphQLResponse<T> {
   data: T;

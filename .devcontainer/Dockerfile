@@ -19,10 +19,9 @@ RUN curl -L https://foundry.paradigm.xyz | bash
 RUN /home/node/.foundry/bin/foundryup
 RUN echo 'export PATH="$PATH:/home/node/.foundry/bin"' >> /home/node/.zshenv
 
-# Install Rindexer
-COPY --chown=node:node rindexer.sh /home/node/rindexer.sh
-RUN chmod +x /home/node/rindexer.sh && /home/node/rindexer.sh && rm /home/node/rindexer.sh
+# Install Rindexer - Updated installation method
+RUN curl --proto '=https' --tlsv1.2 -LsSf https://rindexer.xyz/install.sh | sh
 RUN echo 'export PATH="$PATH:/home/node/.rindexer/bin"' >> /home/node/.zshenv
-RUN echo "alias rindexerup='bash /Users/nurdism/.rindexer/bin/rindexerup \$@'" >> /home/node/.zshenv
-RUN echo "alias rindexerdown='bash /Users/nurdism/.rindexer/bin/rindexerdown'" >> /home/node/.zshenv
+RUN echo "alias rindexerup='bash /home/node/.rindexer/bin/rindexerup \$@'" >> /home/node/.zshenv
+RUN echo "alias rindexerdown='bash /home/node/.rindexer/bin/rindexerdown'" >> /home/node/.zshenv
 

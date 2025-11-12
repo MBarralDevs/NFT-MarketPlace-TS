@@ -2,11 +2,64 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchGraphQL } from "../utils/graphQL-client";
 import type { AllMarketplaceEventsData, ActiveListing } from "../types/marketplaceTypes";
 
+// Query WITHOUT network filter (for when network is not specified)
+const GET_MARKETPLACE_EVENTS = `
+  query GetMarketplaceEvents(
+    $first: Int
+    $orderBy: [ItemListedsOrderBy!]
+  ) {
+    allItemListeds(
+      first: $first
+      orderBy: $orderBy
+    ) {
+      nodes {
+        rindexerId
+        contractAddress
+        seller
+        nftAddress
+        tokenId
+        price
+        txHash
+        blockNumber
+        blockTimestamp
+        blockHash
+        network
+        txIndex
+        logIndex
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
+    }
+    allItemBoughts {
+      nodes {
+        contractAddress
+        nftAddress
+        tokenId
+        network
+      }
+    }
+    allItemCanceleds {
+      nodes {
+        contractAddress
+        nftAddress
+        tokenId
+        network
+      }
+    }
+  }
+`;
+
+// Query WITH network filter
 const GET_MARKETPLACE_EVENTS_WITH_FILTER = `
   query GetMarketplaceEvents(
     $first: Int
     $orderBy: [ItemListedsOrderBy!]
-    $networkFilter: String
+    $networkFilter: String!
   ) {
     allItemListeds(
       first: $first
@@ -67,7 +120,6 @@ function filterActiveListings(data: AllMarketplaceEventsData): ActiveListing[] {
   console.log(`Total listed items: ${listedItems.length}`);
   console.log(`Total bought items: ${boughtItems.length}`);
   console.log(`Total canceled items: ${canceledItems.length}`); 
-  console.log(process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT);
 
   // Create a Set of unique identifiers for bought and canceled items
   const inactiveItemsSet = new Set<string>();
@@ -88,6 +140,8 @@ function filterActiveListings(data: AllMarketplaceEventsData): ActiveListing[] {
     return !inactiveItemsSet.has(key) && item.tokenId && item.price && item.nftAddress && item.seller;
   });
 
+  console.log(`Active listings after filtering: ${activeListings.length}`);
+
   // Map to ActiveListing type
   return activeListings.map((item) => ({
     tokenId: item.tokenId!,
@@ -103,7 +157,7 @@ function filterActiveListings(data: AllMarketplaceEventsData): ActiveListing[] {
 interface UseActiveListingsOptions {
   first?: number;
   orderBy?: string[];
-  network?: string; // Filter by specific network (e.g., "ethereum", "polygon")
+  network?: string; // Filter by specific network (e.g., "anvil", "ethereum", "polygon")
   enabled?: boolean;
 }
 
@@ -116,8 +170,8 @@ interface UseActiveListingsOptions {
  * const { data } = useActiveListings();
  * 
  * @example
- * // Get active listings on Ethereum mainnet only
- * const { data } = useActiveListings({ network: "ethereum" });
+ * // Get active listings on Anvil network only
+ * const { data } = useActiveListings({ network: "anvil" });
  * 
  * @example
  * // Get top 20 most expensive listings on Polygon
@@ -138,14 +192,14 @@ export function useActiveListings(options: UseActiveListingsOptions = {}) {
   return useQuery({
     queryKey: ["activeListings", first, orderBy, network],
     queryFn: async () => {
-      const data = await fetchGraphQL<AllMarketplaceEventsData>(
-        GET_MARKETPLACE_EVENTS_WITH_FILTER,
-        {
-          first,
-          orderBy,
-          networkFilter: network || null,
-        }
-      );
+      // Use different query based on whether network filter is provided
+      const query = network ? GET_MARKETPLACE_EVENTS_WITH_FILTER : GET_MARKETPLACE_EVENTS;
+      
+      const variables = network 
+        ? { first, orderBy, networkFilter: network }
+        : { first, orderBy };
+
+      const data = await fetchGraphQL<AllMarketplaceEventsData>(query, variables);
       return filterActiveListings(data);
     },
     enabled,

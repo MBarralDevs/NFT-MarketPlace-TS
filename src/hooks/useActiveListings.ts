@@ -67,6 +67,7 @@ function filterActiveListings(data: AllMarketplaceEventsData): ActiveListing[] {
   console.log(`Total listed items: ${listedItems.length}`);
   console.log(`Total bought items: ${boughtItems.length}`);
   console.log(`Total canceled items: ${canceledItems.length}`); 
+  console.log(process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT);
 
   // Create a Set of unique identifiers for bought and canceled items
   const inactiveItemsSet = new Set<string>();

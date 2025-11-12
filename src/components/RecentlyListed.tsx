@@ -43,12 +43,17 @@ export default function RecentlyListedNFTs() {
             {!isLoading && !error && activeListings && activeListings.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                     {activeListings.map((listing) => (
-                        <NFTBox
+                        <Link
                             key={`${listing.contractAddress}-${listing.tokenId}-${listing.network}`}
-                            tokenId={listing.tokenId}
-                            contractAddress={listing.nftAddress}
-                            price={listing.price}
-                        />
+                            href={`/buy-nft/${listing.nftAddress}/${listing.tokenId}`}
+                            className="block transition-transform hover:scale-105 cursor-pointer"
+                        >
+                            <NFTBox
+                                tokenId={listing.tokenId}
+                                contractAddress={listing.nftAddress}
+                                price={listing.price}
+                            />
+                        </Link>
                     ))}
                 </div>
             )}
